@@ -19,7 +19,7 @@ int board[8][6];
 const int startup[8][6] = {
 	0, 0, 0, 0, king, 0,
 	knight, bish, rook, rook, bish, knight,
-	0, 0, 0, pawn, 0, 0,
+	0, 0, 0, 0, 0, 0,
 	0, 0, pawn, 0, 0, 0,
 	0, 0, 0, 0, KNIGHT, 0,
 	0, 0, PAWN, PAWN, 0, 0,
@@ -118,54 +118,157 @@ bool ValidateMove(int colSource, int rowSource, int colDest, int rowDest)
 			cout << "Illegal: There is no game piece in the source location" << endl;
 			break;
 		case bish:
-			cout << "Moving bish" << endl;
-			if(abs(xDelta) == abs(yDelta)) // moving diagonally, legal
+			cout << "Moving player's bishop..." << endl;
+			if(abs(xDelta) == abs(yDelta)) // Player moving diagonally, legal
 			{
-				if (xDelta > 0 && yDelta > 0) // moving forward-right, legal
+				if (xDelta > 0 && yDelta > 0) //Player moving forward-right, legal
 				{
-					if (board[rowSource+1][colSource+1] < 0) // check if the next piece is friendly, illegal
+					if (board[rowSource + 1][colSource + 1] < 0) // if the next piece in our move is friendly, illegal
 					{
 						cout << "   Illegal: The next position in your desired move is friendly" << endl;
 						return false;
 					}
-					cout << "   moving bishop forward-right" << endl;
-					/*
-					for (; rowSource<rowDest && colSource<colDest; rowSource++, colSource++)
+					cout << "   ...moving forward-right" << endl;
+
+					bool keep_moving = true;
+					int rowCurr = rowSource;
+					int colCurr = colSource;
+					for (; rowCurr<rowDest && colCurr<colDest && keep_moving; rowCurr++, colCurr++)
 					{
-						if (board[rowSource+1][colSource+1] != 0) // encountered another game piece
+						if(board[rowCurr + 1][colCurr + 1] < 0) // encountered friendly game piece, stop here
 						{
-							if (isupper(board[rowSource][colSource])) // opponent piece
-							{
-								// take the piece, move our piece to this position
-							}
-							else // our own piece
-							{
-								// move our piece to previous position
-							}
+							keep_moving = false;
+							cout << "   ...next position holds a friendly piece, stopping here";
+						}
+						else if(board[rowCurr + 1][colCurr + 1] > 0) // encountered enemy piece in next position, make move and then stop
+						{
+							board[rowCurr + 1][colCurr + 1] = board[rowCurr][colCurr];
+							board[rowCurr][colCurr] = 0;
+							keep_moving = false;
+							cout << "   ...captured an enemy piece at " << rowCurr+1 << colCurr+1 << endl;
+						}
+						else // next space is empty, make move and keep going
+						{
+							board[rowCurr + 1][colCurr + 1] = board[rowCurr][colCurr];
+							board[rowCurr][colCurr] = 0;
+							keep_moving = true;
 						}
 					}
-					*/
+
 					valid = true;
 				}
-				else if (xDelta < 0 && yDelta > 0) // moving forward-left
+				else if (xDelta < 0 && yDelta > 0) // Player moving forward-left, legal
 				{
-					if (board[rowSource+1][colSource-1] < 0) // check if the next piece is friendly, illegal
+					if (board[rowSource - 1][colSource + 1] < 0) // if the next piece in our move is friendly, illegal
 					{
 						cout << "   Illegal: The next position in your desired move is friendly" << endl;
 						return false;
 					}
-					cout << "   moving bishop forward-left" << endl;
+					cout << "   ...moving forward-left" << endl;
+
+					bool keep_moving = true;
+					int rowCurr = rowSource;
+					int colCurr = colSource;
+					for (; rowCurr<rowDest && colCurr>colDest && keep_moving; rowCurr++, colCurr--)
+					{
+						if (board[rowCurr + 1][colCurr - 1] < 0) // encountered friendly game piece, stop here
+						{
+							keep_moving = false;
+							cout << "   ...next position holds a friendly piece, stopping here";
+						}
+						else if (board[rowCurr + 1][colCurr - 1] > 0) // encountered enemy piece in next position, make move and then stop
+						{
+							board[rowCurr + 1][colCurr - 1] = board[rowCurr][colCurr];
+							board[rowCurr][colCurr] = 0;
+							keep_moving = false;
+							cout << "   ...captured an enemy piece at " << rowCurr+1 << colCurr-1 << endl;
+						}
+						else // next space is empty, make move and keep going
+						{
+							board[rowCurr + 1][colCurr - 1] = board[rowCurr][colCurr];
+							board[rowCurr][colCurr] = 0;
+							keep_moving = true;
+						}
+					}
+
 					valid = true;
 				}
 			}
 			break;
 		case BISH:
-			cout << "Moving BISH" << endl;
-			if (abs(xDelta) == abs(yDelta))
+			cout << "Moving computer's bishop..." << endl;
+			if (abs(xDelta) == abs(yDelta))	// Computer is moving diagonally, legal
 			{
-				if ((xDelta < 0 && yDelta < 0) || (xDelta > 0 && yDelta < 0)) // moving forward
+				if (xDelta < 0 && yDelta < 0) // Computer moving forward-right, legal
 				{
-					cout << "   ...moving forward" << endl;
+					if (board[rowSource - 1][colSource - 1] > 0) // if the next piece in our move is friendly, illegal
+					{
+						cout << "   Illegal: The next position in your desired move is friendly" << endl;
+						return false;
+					}
+
+					cout << "   ...moving forward-right" << endl;
+
+					bool keep_moving = true;
+					int rowCurr = rowSource;
+					int colCurr = colSource;
+					for (; rowCurr>rowDest && colCurr>colDest && keep_moving; rowCurr--, colCurr--)
+					{
+						if (board[rowCurr - 1][colCurr - 1] > 0) // encountered friendly game piece, stop here
+						{
+							keep_moving = false;
+							cout << "   ...next position holds a friendly piece, stopping here";
+						}
+						else if (board[rowCurr - 1][colCurr - 1] < 0) // encountered enemy piece in next position, make move and then stop
+						{
+							board[rowCurr - 1][colCurr - 1] = board[rowCurr][colCurr];
+							board[rowCurr][colCurr] = 0;
+							keep_moving = false;
+							cout << "   ...captured an enemy piece at " << rowCurr - 1 << colCurr - 1 << endl;
+						}
+						else // next space is empty, make move and keep going
+						{
+							board[rowCurr - 1][colCurr - 1] = board[rowCurr][colCurr];
+							board[rowCurr][colCurr] = 0;
+							keep_moving = true;
+						}
+					}
+					valid = true;
+				}
+				else if (xDelta > 0 && yDelta < 0)
+				{
+					if (board[rowSource - 1][colSource + 1] > 0) // if the next piece in our move is friendly, illegal
+					{
+						cout << "   Illegal: The next position in your desired move is friendly" << endl;
+						return false;
+					}
+
+					cout << "   ...moving forward-left" << endl;
+
+					bool keep_moving = true;
+					int rowCurr = rowSource;
+					int colCurr = colSource;
+					for (; rowCurr > rowDest && colCurr < colDest && keep_moving; rowCurr--, colCurr++)
+					{
+						if (board[rowCurr - 1][colCurr + 1] > 0) // encountered friendly game piece, stop here
+						{
+							keep_moving = false;
+							cout << "   ...next position holds a friendly piece, stopping here";
+						}
+						else if (board[rowCurr - 1][colCurr + 1] < 0) // encountered enemy piece in next position, make move and then stop
+						{
+							board[rowCurr - 1][colCurr + 1] = board[rowCurr][colCurr];
+							board[rowCurr][colCurr] = 0;
+							keep_moving = false;
+							cout << "   ...captured an enemy piece at " << rowCurr - 1 << colCurr + 1 << endl;
+						}
+						else // next space is empty, make move and keep going
+						{
+							board[rowCurr - 1][colCurr + 1] = board[rowCurr][colCurr];
+							board[rowCurr][colCurr] = 0;
+							keep_moving = true;
+						}
+					}
 					valid = true;
 				}
 			}
@@ -209,8 +312,8 @@ int main(void)
 
 			if (ValidateMove(colSource, rowSource, colDest, rowDest))
 			{
-				board[rowDest][colDest] = board[rowSource][colSource];
-				board[rowSource][colSource] = 0;
+				//board[rowDest][colDest] = board[rowSource][colSource];
+				//board[rowSource][colSource] = 0;
 			}
 			else
 			{
